@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import redis
 import scrapy
 
 
@@ -7,6 +9,9 @@ class BikesampaSpider(scrapy.Spider):
     allowed_domains = ['bikeitau.com.br']
     start_urls = ['http://bikeitau.com.br/bikesampa/']
 
+    def __init__(self):
+        self.redis = redis.Redis.from_url(os.environ.get('REDIS_URL'))
+
     def parse(self, response):
         lat = self.fetch(response, 'lat_arr')
         lng = self.fetch(response, 'long_arr')
@@ -14,12 +19,11 @@ class BikesampaSpider(scrapy.Spider):
         for station in self.merge(lat, lng):
             yield station
 
-
     def fetch(self, response, field):
         query = "//input[@id='{}']/@value".format(field)
 
         result = response.xpath(query).get()
-        
+
         return [item.strip() for item in result.split(';')]
 
     def merge(self, lat, lng):
