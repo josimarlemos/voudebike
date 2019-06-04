@@ -2,6 +2,8 @@
 import os
 import redis
 import scrapy
+import datetime
+from crowler.items import Service
 
 
 class BikesampaSpider(scrapy.Spider):
@@ -16,8 +18,11 @@ class BikesampaSpider(scrapy.Spider):
         lat = self.fetch(response, 'lat_arr')
         lng = self.fetch(response, 'long_arr')
 
-        for station in self.merge(lat, lng):
-            yield station
+        yield Service(
+            name=self.name,
+            stations=self.merge(lat, lng),
+            created_at=datetime.datetime.now()
+        )
 
     def fetch(self, response, field):
         query = "//input[@id='{}']/@value".format(field)
