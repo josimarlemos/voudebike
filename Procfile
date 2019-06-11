@@ -1,2 +1,2 @@
-web: gunicorn server:app
+web: gunicorn web:app
 clock: python clock.py
