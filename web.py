@@ -1,7 +1,8 @@
 import os
 import json
 import redis
-from flask import Flask, make_response, jsonify
+import subprocess
+from flask import Flask
 
 
 app = Flask(__name__)
@@ -11,13 +12,18 @@ redis = redis.Redis.from_url(url)
 
 @app.route('/api/stations')
 def stations():
-    keys = [
-        key.decode().split(':').pop()
-        for key in redis.keys('services:*')
-    ]
+    try:
+        keys = [
+            key.decode().split(':').pop()
+            for key in redis.keys('services:*')
+        ]
 
-    keys.sort()
-    
-    key = 'services:{}'.format(keys.pop())
+        keys.sort()
 
-    return redis.get(key)
+        key = 'services:{}'.format(keys.pop())
+
+        return redis.get(key)
+    except:
+        subprocess.Popen(['scrapy', 'crawl', 'bikesampa'])
+
+        return json.dumps([])
